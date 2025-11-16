@@ -1,0 +1,6 @@
+Linear Regression Coefficients
+
+Avg. Session Length: 25.932524
+Time on App: 38.830516
+Time on Website: 0.306284
+Length of Membership: 61.547356

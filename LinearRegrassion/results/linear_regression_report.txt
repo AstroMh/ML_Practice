@@ -1,0 +1,4 @@
+Linear Regression Evaluation
+MAE : 7.121788
+MSE : 79.531112
+RMSE: 8.918022
