@@ -19,17 +19,7 @@ from sklearn.metrics import (
     auc,
 )
 
-
-# -------------------------------------------------------------------
-# Paths & data loading
-# -------------------------------------------------------------------
-
 def get_project_paths(results_dir_name: str = "results"):
-    """
-    Helper to get absolute paths based on the location of this script.
-    Dataset is loaded from sklearn (no CSV needed), but we still
-    create a results directory next to this script.
-    """
     base_dir = os.path.dirname(os.path.abspath(__file__))
     results_dir = os.path.join(base_dir, results_dir_name)
     os.makedirs(results_dir, exist_ok=True)
@@ -37,31 +27,11 @@ def get_project_paths(results_dir_name: str = "results"):
 
 
 def load_data(as_frame: bool = True):
-    """
-    Load the Breast Cancer dataset as a pandas DataFrame.
-    Returns both the DataFrame and the original sklearn Bunch object.
-
-    DataFrame includes all 30 features and 'target' column:
-      - 0 = malignant
-      - 1 = benign
-    """
     data = load_breast_cancer(as_frame=as_frame)
     df = data.frame
     return df, data
 
-
-# -------------------------------------------------------------------
-# Exploratory analysis & preprocessing
-# -------------------------------------------------------------------
-
 def explore_data(df: pd.DataFrame, results_dir: str) -> None:
-    """
-    Basic exploratory visualization.
-
-    Saves:
-      - pairplot of a subset of features + target
-      - correlation heatmap of all numeric columns
-    """
     # Subset for pairplot (to keep it readable)
     cols_for_pairplot = [
         "mean radius",
@@ -84,7 +54,7 @@ def explore_data(df: pd.DataFrame, results_dir: str) -> None:
     # Correlation heatmap (all numeric cols, including target)
     corr = df.corr()
     plt.figure(figsize=(10, 8))
-    sns.heatmap(corr, cmap="coolwarm", center=0)
+    sns.heatmap(corr, cmap="coolwarm", center=0, annot=True)
     plt.title("Breast Cancer – Correlation Heatmap")
     plt.tight_layout()
     heatmap_path = os.path.join(results_dir, "breast_cancer_rf_corr_heatmap.png")
@@ -116,9 +86,6 @@ def train_test_split_data(
     test_size: float = 0.2,
     random_state: int = 42,
 ):
-    """
-    Split features and target into train and test sets with stratification.
-    """
     return train_test_split(
         X,
         y,
@@ -128,11 +95,6 @@ def train_test_split_data(
         stratify=y,
     )
 
-
-# -------------------------------------------------------------------
-# Modeling & evaluation
-# -------------------------------------------------------------------
-
 def train_random_forest(
     X_train,
     y_train,
@@ -140,9 +102,6 @@ def train_random_forest(
     max_depth=None,
     random_state: int = 42,
 ):
-    """
-    Fit a Random Forest classifier.
-    """
     rf = RandomForestClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
@@ -161,20 +120,13 @@ def evaluate_classifier(
     report_filename: str = "breast_cancer_random_forest_report.txt",
     cm_filename: str = "breast_cancer_random_forest_confusion_matrix.png",
 ):
-    """
-    Evaluate a classification model and save metrics + confusion matrix.
 
-    Saves:
-      - Text report (accuracy + classification report + confusion matrix)
-      - Confusion matrix heatmap as PNG
-    """
     y_pred = model.predict(X_test)
 
     acc = accuracy_score(y_test, y_pred)
     cm = confusion_matrix(y_test, y_pred)
     cr = classification_report(y_test, y_pred)
 
-    # Print to console
     print("\n=== Breast Cancer – Random Forest Evaluation ===")
     print(f"Accuracy: {acc:.4f}")
     print("Confusion matrix:")
@@ -182,7 +134,6 @@ def evaluate_classifier(
     print("\nClassification report:")
     print(cr)
 
-    # Save text report
     report_path = os.path.join(results_dir, report_filename)
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("Breast Cancer – Random Forest Evaluation\n\n")
@@ -220,9 +171,7 @@ def plot_roc_curve(
     results_dir: str,
     filename: str = "breast_cancer_random_forest_roc_curve.png",
 ):
-    """
-    Plot ROC curve and save it as PNG. Also returns FPR, TPR, AUC.
-    """
+
     if not hasattr(model, "predict_proba"):
         raise RuntimeError("Model does not support predict_proba; cannot compute ROC curve.")
 
@@ -253,9 +202,7 @@ def plot_feature_importances(
     results_dir: str,
     filename: str = "breast_cancer_random_forest_feature_importances.png",
 ):
-    """
-    Plot feature importances as a horizontal bar chart and save to PNG.
-    """
+
     importances = model.feature_importances_
     series = pd.Series(importances, index=feature_names).sort_values()
 
@@ -283,9 +230,7 @@ def save_feature_importances_table(
     filename_csv: str = "breast_cancer_random_forest_feature_importances.csv",
     filename_txt: str = "breast_cancer_random_forest_feature_importances.txt",
 ):
-    """
-    Save feature importances to CSV and TXT files.
-    """
+
     importances = model.feature_importances_
     fi_df = pd.DataFrame(
         {"feature": feature_names, "importance": importances}
@@ -302,30 +247,17 @@ def save_feature_importances_table(
 
     print(f"[INFO] Feature importances saved to {csv_path} and {txt_path}")
 
-
-# -------------------------------------------------------------------
-# Main script
-# -------------------------------------------------------------------
-
 def main():
-    # Resolve paths
     _, results_dir = get_project_paths(results_dir_name="results")
 
-    # 1. Load data
     df, data_bunch = load_data(as_frame=True)
 
-    # 2. Exploratory analysis
     explore_data(df, results_dir=results_dir)
-
-    # 3. Prepare features and target
     X, y, feature_names = prepare_features(df)
-
-    # 4. Train/test split
     X_train, X_test, y_train, y_test = train_test_split_data(
         X, y, test_size=0.2, random_state=42
     )
 
-    # 5. Train Random Forest
     rf_model = train_random_forest(
         X_train,
         y_train,
@@ -333,7 +265,6 @@ def main():
         max_depth=None,
     )
 
-    # 6. Evaluate model
     y_pred, metrics = evaluate_classifier(
         rf_model,
         X_test,
@@ -343,7 +274,6 @@ def main():
         cm_filename="breast_cancer_random_forest_confusion_matrix.png",
     )
 
-    # 7. ROC curve
     plot_roc_curve(
         rf_model,
         X_test,
@@ -352,7 +282,6 @@ def main():
         filename="breast_cancer_random_forest_roc_curve.png",
     )
 
-    # 8. Feature importances (plots + tables)
     plot_feature_importances(
         rf_model,
         feature_names,
@@ -366,7 +295,6 @@ def main():
         filename_csv="breast_cancer_random_forest_feature_importances.csv",
         filename_txt="breast_cancer_random_forest_feature_importances.txt",
     )
-
 
 if __name__ == "__main__":
     main()
