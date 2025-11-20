@@ -1,0 +1,32 @@
+Breast Cancer – Random Forest Feature Importances
+
+worst area: 0.130008
+worst perimeter: 0.127948
+worst concave points: 0.127183
+worst radius: 0.092807
+mean concave points: 0.089029
+mean radius: 0.054538
+mean concavity: 0.050924
+mean perimeter: 0.049703
+mean area: 0.042165
+area error: 0.037021
+worst concavity: 0.033653
+worst texture: 0.017897
+radius error: 0.016940
+worst compactness: 0.016705
+mean texture: 0.013547
+mean compactness: 0.013398
+worst smoothness: 0.013386
+worst symmetry: 0.009908
+perimeter error: 0.008243
+worst fractal dimension: 0.006412
+mean smoothness: 0.006283
+concave points error: 0.006136
+concavity error: 0.005774
+texture error: 0.004873
+fractal dimension error: 0.004681
+symmetry error: 0.004464
+compactness error: 0.004397
+mean symmetry: 0.004280
+smoothness error: 0.004262
+mean fractal dimension: 0.003436
